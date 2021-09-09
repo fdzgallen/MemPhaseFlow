@@ -1,5 +1,5 @@
 Couette_ellipsoid_v=015	# "simulation" name of the folder where the data will be saved
-0.15	# "wallspd" Couette speed in dx/dt units
+0.15	# "wallspd" the speed of the top wall for a Couette flow in dx/dt units
 40  	# "R1" long ellipse radius for the initial conditions for the vesicle
 9.2 	# "R2" long ellipse radius for the initial conditions for the vesicle. For Red blood cells taken as 0.23*R1
 25000000   # "Tend" total number of steps for the simulation to end
