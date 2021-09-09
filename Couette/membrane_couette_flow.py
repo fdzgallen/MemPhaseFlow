@@ -12,7 +12,7 @@ from numpy import *
 file=os.path.join('./inputs.txt')
 with open(file,'r') as f:  
     simulation = str(f.readline().partition('#')[0]).strip() # "simulation" name of the folder where the data will be saved 
-    Pspeed = float(f.readline().partition('#')[0]) 	# "Pspeed" Poiseuille speed in dx/dt units
+    wallspd = float(f.readline().partition('#')[0]) 	# "wallspd" Poiseuille speed in dx/dt units
     R1 = float(f.readline().partition('#')[0])   	# "R1" long ellipse radius for the initial conditions for the vesicle
     R2 = float(f.readline().partition('#')[0])	# "R2" long ellipse radius for the initial conditions for the vesicle. For Red blood cells taken as 0.23*R1
     Tend = int(f.readline().partition('#')[0])   # "Tend" total number of steps for the simulation to end
@@ -38,15 +38,13 @@ with open(file,'r') as f:
 viscositymemb = 0.5*(viscositycell+viscosityliq) 	# "viscositymemb" is usually taken as (viscositycell+viscosityliq)/2 if there is no interest in defining a different membrane viscosity
 L=float(Nx-1)
 H=float(Ny-1)
-deltaPdl= Pspeed/(H**2)*6*viscosityliq
 idx=1/dx
 idy=1/dy
 kappaee=kappa/eps/eps
 iH=1/(float(H))
 iL=1/(float(L))
 idx=1/dx
-idy=1/dy
-cte=deltaPdl/(viscosityliq)
+idy=1/dy 
  
 print(simulation)
 
@@ -228,20 +226,20 @@ def vorticity_periodic(p, b):
                          (2 * (dx**2 + dy**2)) -
                          dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, 1:-1])
  
-        p[:,-1] = cte*H  #   at y = Ny
-        p[:,0]  = -cte*H  #   at y = 0
 
-                # OLD Periodic BC Pressure @ x = 2
+                # Periodic BC Pressure @ x = 2
         p[-1,1:-1] = (((pn[0,1:-1] + pn[-2,1:-1])* dy**2 +
                         (pn[-1,2:] + pn[-1,0:-2]) * dx**2) /
                        (2 * (dx**2 + dy**2)) -
                        dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[-1,1:-1])
 
-        # OLD Periodic BC Pressure @ x = 0
+        # Periodic BC Pressure @ x = 0
         p[0,1:-1] = (((pn[1,1:-1] + pn[-1,1:-1])* dy**2 +
                        (pn[0,2:] + pn[0,0:-2]) * dx**2) /
                       (2 * (dx**2 + dy**2)) -
                       dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[0,1:-1])
+        p[:,-1] = -wallspd*iH  #   at y = Ny
+        p[:,0]  = -wallspd*iH  #   at y = 0
     return p
 
 #Code to solve the Poisson equation in 2D by an iterative solver, adapted from 2017 Lorena A. Barba, Gilbert F. Forsyth https://github.com/barbagroup/CFDPython
@@ -264,7 +262,7 @@ def streamfunction_periodic(p, b):
                         (2 * (dx**2 + dy**2)) -
                         dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[0,1:-1])
         # Wall boundary conditions, stream function
-        p[:,-1] = cte*H*H*H/6 #  at y = Ny
+        p[:,-1] = wallspd*H*0.5 #  at y = Ny
         p[:,0] = 0  #  at y = 0
     return p
 
@@ -358,7 +356,7 @@ with open(file,'w+') as f:
     f.write('Nx0 = {0}\n'.format(Nx0))
     f.write('Ny0 = {0}\n'.format(Ny0)) 
     f.write('C0 = {0}\n'.format(C0))
-    f.write('Pspeed = {0}\n'.format(Pspeed)) 
+    f.write('wallspd = {0}\n'.format(wallspd)) 
     f.close()
  
 ############################################ Temporal evolution of the system ####################################################

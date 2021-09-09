@@ -1,21 +1,21 @@
-Poiseuille_ellipsoid_v=035	# "simulation" name of the folder where the data will be saved
-0.35	# "Pspeed" Poiseuille speed in dx/dt units
+Poiseuille_antiparachute_v=03	# "simulation" name of the folder where the data will be saved
+0.3	# "Pspeed" Poiseuille speed in dx/dt units
 40  	# "R1" long ellipse radius for the initial conditions for the vesicle
 9.2 	# "R2" long ellipse radius for the initial conditions for the vesicle. For Red blood cells taken as 0.23*R1
 25000000   # "Tend" total number of steps for the simulation to end
 75000      # "t0" number of time steps to evolve the interface before starting running the fluid flow
 25000    # "tdump" data dump period
-350          # "Nx" lattice size X
-121          # "Ny" lattice size Y
+500          # "Nx" lattice size X
+401          # "Ny" lattice size Y
 70          # "Nx0" starting position of the cell in X axis
-59         # "Ny0" starting position of the cell in Y axis
+199         # "Ny0" starting position of the cell in Y axis
 2.0         # "eps" interfacial width, to increase eps its necessary to decrease "dt" so that the simulation converges, reducing eps gives lower resolution for stream function and voritcity fields
 0.0         # "C0" Spontaneous curvature
 0.10           # "M" mobility
 0.001     # "dt" temporal resolution
 1.0          # "dx" spatial resolution
 1.0          # "dy" spatial resolution
-0.0     # "alpha" Strength of the lagrange mutiplier effect for AREA
+0.5     # "alpha" Strength of the lagrange mutiplier effect for AREA
 -0.0001     # "beta" Strength of the lagrange mutiplier effect for volume
 5         # "nit" number of iterations for the iterative Poisson solver. As the state of the simulation is always close to the next solution we dont need many iterations
 1.0	# "kappa" bending modulus of the membrane

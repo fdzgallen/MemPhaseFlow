@@ -1,3 +1,16 @@
+##############################################################################
+# Author: Andreu Fernandez Gallen, contact email: fdzgallen@gmail.com
+#
+# This code implements the model presented in the article "Red Blood Cells in 
+# low Reynolds number flow: a vorticity-based characterization of shapes in two 
+# dimensions" in the Soft Matter Journal. 
+#
+# This model simulates a biological membrane characterized by  its bending 
+# energy and area+volume conservation inside a fluid flow in 2D.
+# The fluid flow is computed by solving 2 Poisson equations to obtain the 
+# stream function and the voriticity, which we use to compute the flow.
+##############################################################################
+
 # Import libraries
 import numpy as np 
 import os.path
@@ -8,7 +21,7 @@ from matplotlib.ticker import FormatStrFormatter
 from shutil import copyfile
 from numpy import *
 
-
+# Importing the parameters that define this simulation 
 file=os.path.join('./inputs.txt')
 with open(file,'r') as f:  
     simulation = str(f.readline().partition('#')[0]).strip() # "simulation" name of the folder where the data will be saved 
@@ -34,8 +47,10 @@ with open(file,'r') as f:
     kappa = float(f.readline().partition('#')[0]) 	# "kappa" bending modulus of the membrane
     viscosityliq = float(f.readline().partition('#')[0])  	# "viscosityliq" viscosity value of the liquid
     viscositycell = float(f.readline().partition('#')[0])	# "viscositycell" viscosity value of the liquid inside the cell
-    
+
 viscositymemb = 0.5*(viscositycell+viscosityliq) 	# "viscositymemb" is usually taken as (viscositycell+viscosityliq)/2 if there is no interest in defining a different membrane viscosity
+
+# We will store this values on memory to not need to compute them each time
 L=float(Nx-1)
 H=float(Ny-1)
 deltaPdl= Pspeed/(H**2)*6*viscosityliq
@@ -228,20 +243,22 @@ def vorticity_periodic(p, b):
                          (2 * (dx**2 + dy**2)) -
                          dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[1:-1, 1:-1])
  
-        p[:,-1] = cte*H  #   at y = Ny
-        p[:,0]  = -cte*H  #   at y = 0
 
-                # OLD Periodic BC Pressure @ x = 2
+        # Periodic BC Pressure @ x = 2
         p[-1,1:-1] = (((pn[0,1:-1] + pn[-2,1:-1])* dy**2 +
                         (pn[-1,2:] + pn[-1,0:-2]) * dx**2) /
                        (2 * (dx**2 + dy**2)) -
                        dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[-1,1:-1])
 
-        # OLD Periodic BC Pressure @ x = 0
+        # Periodic BC Pressure @ x = 0
         p[0,1:-1] = (((pn[1,1:-1] + pn[-1,1:-1])* dy**2 +
                        (pn[0,2:] + pn[0,0:-2]) * dx**2) /
                       (2 * (dx**2 + dy**2)) -
                       dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[0,1:-1])
+                      
+        # Wall boundary conditions, vorticity - This term defines the type of flow we have: Poiseuille, Couette, etc
+        p[:,-1] = cte*H  #   at y = Ny
+        p[:,0]  = -cte*H  #   at y = 0
     return p
 
 #Code to solve the Poisson equation in 2D by an iterative solver, adapted from 2017 Lorena A. Barba, Gilbert F. Forsyth https://github.com/barbagroup/CFDPython
@@ -263,7 +280,7 @@ def streamfunction_periodic(p, b):
                         (pn[0, 2:] + pn[0, 0:-2]) * dx**2) /
                         (2 * (dx**2 + dy**2)) -
                         dx**2 * dy**2 / (2 * (dx**2 + dy**2)) * b[0,1:-1])
-        # Wall boundary conditions, stream function
+        # Wall boundary conditions, stream function - This term defines the type of flow we have: Poiseuille, Couette, etc
         p[:,-1] = cte*H*H*H/6 #  at y = Ny
         p[:,0] = 0  #  at y = 0
     return p
@@ -292,11 +309,13 @@ def compute_visco(phi):
 
 ####################################  MAIN CODE  ##########################################################
 
-## Initial conditions
-phi=np.zeros((Nx,Ny)) #Initialization of our system matrix
-w=np.zeros((Nx,Ny)) #Initialization of vorticity matrix
-curr=np.zeros((Nx,Ny)) #Initialization of stream funct matrix
-currin=np.zeros((Nx,Ny)) #Initialization of stream funct matrix
+## Fields that will define the cell and the fluid
+phi  = np.zeros((Nx,Ny)) #Initialization of our system matrix
+w    = np.zeros((Nx,Ny)) #Initialization of vorticity matrix
+curr = np.zeros((Nx,Ny)) #Initialization of stream funct matrix
+
+#to compute the inflence of the membrane on the fluid flow we also need the "unperturbed" stream function
+currin=np.zeros((Nx,Ny)) # Stream function of a flow in the absence of cell, computed from the analytic expression
 
 # Initial configuration for the system. Phi=+1 is the cell volume while phi=-1 is defined as the fluid that contains the cell.
 # The membrane will form during the firsts temporal steps
@@ -332,7 +351,7 @@ if not os.path.exists('./'+simulation+'/vorticity/'):
 
 #We copy the code and the parameters used to run the simulation in the data simulation folder in case we need to check in the future.
 dodo=os.path.join('./'+simulation+'/'+os.path.basename(__file__))
-copyfile(__file__,dodo)    
+copyfile(__file__,dodo)
 file=os.path.join('./'+simulation+'/simulation_parameters.txt')
 with open(file,'w+') as f: 
     f.write('M = {0}\n'.format(M))
@@ -376,19 +395,22 @@ vol=[]
 areat=[]
 areat2=[] 
  
+#First few iterations from t=0 to t=t0 to relax the interface and start up the membrane and Lagrange multipliers
 for t in range(0,t0):
-#Compute parameters of the system and their derivatives
+#Compute parameters of the system (phi, psi, mu) and their derivatives
     lap_phi = lap(phi)
     laparea2=lap(phi*(phi**2-1))
     lap_lap_phi=lap(lap_phi)
     psi_sc,lap_psi = compute_psi(phi,lap_phi)
     mu,lap_mu = compute_mu(phi,psi_sc,lap_psi)
-    if(t < 100000/2): 
-        A0=get_area3(phi)
-        V0=get_volume(phi)
+# At the start we dont enforce the Lagrange multipliers to let the interface evolve from the hard step function 
+# that we set in the initial conditions to the smooth diffuse interface characteristic of the phase field
+    if(t < t0/2): 
+        A0=get_area3(phi) #area reference value for the pentaly approach lagrange multiplier
+        V0=get_volume(phi) #area reference value for the pentaly approach lagrange multiplier
     v=get_volume(phi)
     area2=get_area3(phi)
-    if(t > 100000/2):
+    if(t > t0/2): #after a while we start computing the Lagrange multipliers Sigma (for that we need to compute additional gradients)
         gradphi = periodic_gradN(phi)
         gradmu = periodic_gradN(mu)
         grad_lapmu = periodic_gradN(lap_mu)
@@ -396,6 +418,7 @@ for t in range(0,t0):
         Sigma = compute_multiplier_global2_withoutflow(gradphi,grad_lapmu,grad_laplapphi)
         Sigma2 = compute_multiplier_global(A0,area2)
         Sigma3 = compute_multiplier_volume(V0,v)
+# Evolution of the membrane (phi) only by the membrane energy (Bending + Lagrange multipliers) with no flow interaction
     phi[:,1:-1] += dt*M*(kappa*lap_mu[:,1:-1]-Sigma*lap_lap_phi[:,1:-1]+Sigma2*laparea2[:,1:-1]+Sigma3)                                 #temporal evolution of the order parameter
     
     if (t % tdump == 0): #Dumping the data
@@ -403,7 +426,7 @@ for t in range(0,t0):
         start = time.perf_counter()        
          
 
-
+# Now the real simulation with fluid flow and membrane interaction, from t=t0 to t=Tend
 for t in range(t0,Tend):
 #Compute parameters of the system and their derivatives
     lap_phi = lap(phi)
@@ -413,6 +436,7 @@ for t in range(t0,Tend):
     viscosity = compute_visco(phi) 
     area2=get_area3(phi)
     v=get_volume(phi)
+    laparea2=lap(phi*(phi**2-1))
     
     gradphi = periodic_gradN(phi)
     gradmu = periodic_gradN(mu)
@@ -420,18 +444,19 @@ for t in range(t0,Tend):
     grad_laplapphi = periodic_gradN(lap_lap_phi)
     gradcurr = periodic_gradN(curr)
     
+#Computing the Lagrange multipliers sigma (it's not strictly necessary the 2nd Lagrange multiplier for area, depending on flow speed time resolution etc might be necessary or not)
     Sigma = compute_multiplier_global2(gradphi,grad_lapmu,grad_laplapphi,gradcurr) #computing of the lagrange multiplier by explicit computation 
     Sigma2 = compute_multiplier_global(A0,area2)
     Sigma3 = compute_multiplier_volume(V0,v) 
     
-    w = vorticity_periodic(w, (gradmu[1]*gradphi[0] - gradmu[0]*gradphi[1])/viscosity) #cuidado signos de las variables
-    curr = streamfunction_periodic(curr, - w) #cuidado signos de las variablesç
-    laparea2=lap(phi*(phi**2-1))
-    phi[:,1:-1] += dt*M*(kappa*lap_mu[:,1:-1]-Sigma*lap_lap_phi[:,1:-1] + Sigma2*laparea2[:,1:-1]+Sigma3)   #basic temporal evolution of the order parameter
+#Computing the fluid evolution by computing the vorticity w and Stream function curr
+    w = vorticity_periodic(w, (gradmu[1]*gradphi[0] - gradmu[0]*gradphi[1])/viscosity)
+    curr = streamfunction_periodic(curr, - w)
+    phi[:,1:-1] += dt*M*(kappa*lap_mu[:,1:-1]-Sigma*lap_lap_phi[:,1:-1] + Sigma2*laparea2[:,1:-1]+Sigma3) #basic membrane temporal evolution of the order parameter
     phi[:,1:-1] += -dt*(gradcurr[1][:,1:-1] *gradphi[0][:,1:-1] -gradcurr[0][:,1:-1] *gradphi[1][:,1:-1] ) #advection term
  
 
-    if (t % tdump == 0): #Dumping the data 
+    if (t % tdump == 0): #Dumping the data to files and plotting the system
         dump(t,start)
         start = time.perf_counter()
          
