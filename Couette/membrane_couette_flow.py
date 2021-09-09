@@ -308,9 +308,9 @@ for i in range(0,Nx):
         else:
             phi[i,j]=-1.0;
         #stream function and vorticity for a poiseuille flow
-        curr[i,j]=-cte*float(j)**2*(2*float(j)-3*(Ny-1))/6  #stream function 
+        curr[i,j]= float(j)**2*wallspd/(2*H)  #stream function 
         currin[i,j]=curr[i,j]                               #initial stream function 
-        w[i,j] = -cte*((Ny-1)-2*float(j))                   #voricity
+        w[i,j] = -wallspd/H                #voricity
 
 
 #folders to store data, in case of non-existing folder it will make a new one
