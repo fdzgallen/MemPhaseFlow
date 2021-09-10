@@ -1,6 +1,7 @@
 # MembraneFlow2D
 
  > Please cite as: Gallen, A. F., Castro, M., & Hernandez-Machado (2021). Red Blood Cells in low Reynolds number flow: a vorticity-basedcharacterization of shapes in two dimensions. Soft Matter, pre-print. 
+ 
  > https://doi.org/
 
 Code to simulate the temporal evolution of a biological membrane inside a fluid flow.
