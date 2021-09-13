@@ -1,4 +1,4 @@
-# MembraneFlow2D
+# MemPhaseFlow: Membrane Phase-field Flow in 2D
 
  > Please cite as: Gallen, A. F., Castro, M., & Hernandez-Machado, A. (2021). Red Blood Cells in low Reynolds number flow: a vorticity-basedcharacterization of shapes in two dimensions. Soft Matter, pre-print. 
  
