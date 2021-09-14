@@ -42,7 +42,7 @@ Variables that define the membrane and the phase field
 * "Nx0" starting position of the cell in X axis
 * "Ny0" starting position of the cell in Y axis
 * "eps" interfacial width, to increase eps its necessary to decrease "dt" so that the simulation converges, reducing eps gives lower resolution for stream function and voritcity fields
-* "C0" Spontaneous curvature of the membrane
+* "C0" Spontaneous curvature of the membrane. Can take values in a (-0.4 , 0.4) range easily. Higher values might give problems. You can obtain the radius of curvature of the spontaneous curvature in dx units by simply R0=1/C0. 
 * "M" mobility of the phase field. This value is important as the relaxation time of the phase field has to be much shorter than that of the fluid
 * "kappa" bending modulus of the membrane
 * "viscosityliq" viscosity value of the liquid of the channel (phi=-1)
