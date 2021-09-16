@@ -358,6 +358,7 @@ with open(file,'w+') as f:
     f.write('dt = {0}\n'.format(dt))
     f.write('eps = {0}\n'.format(eps))
     f.write('alpha = {0}\n'.format(alpha))
+    f.write('beta = {0}\n'.format(beta))
     f.write('nit = {0}\n'.format(nit))
     f.write('deltaPdl = {0}\n'.format(deltaPdl))
     f.write('kappa = {0}\n'.format(kappa)) 

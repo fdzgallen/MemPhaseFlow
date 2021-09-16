@@ -2,9 +2,9 @@ Poiseuille_v=035_viscous_contrast=6	# "simulation" name of the folder where the 
 0.35	# "Pspeed" Poiseuille speed in dx/dt units
 40  	# "R1" long ellipse radius for the initial conditions for the vesicle
 9.2 	# "R2" long ellipse radius for the initial conditions for the vesicle. For Red blood cells taken as 0.23*R1
-25000000   # "Tend" total number of steps for the simulation to end
-75000      # "t0" number of time steps to evolve the interface before starting running the fluid flow
-25000    # "tdump" data dump period
+10000000   # "Tend" total number of steps for the simulation to end
+80000      # "t0" number of time steps to evolve the interface before starting running the fluid flow
+40000    # "tdump" data dump period
 350          # "Nx" lattice size X
 301          # "Ny" lattice size Y
 70          # "Nx0" starting position of the cell in X axis

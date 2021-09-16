@@ -1,14 +1,14 @@
-Couette_ellipsoid_v=015	# "simulation" name of the folder where the data will be saved
-0.15	# "wallspd" the speed of the top wall for a Couette flow in dx/dt units
+Couette_ellipsoid_v=045	# "simulation" name of the folder where the data will be saved
+0.45	# "wallspd" the speed of the top wall for a Couette flow in dx/dt units
 40  	# "R1" long ellipse radius for the initial conditions for the vesicle
 9.2 	# "R2" long ellipse radius for the initial conditions for the vesicle. For Red blood cells taken as 0.23*R1
-25000000   # "Tend" total number of steps for the simulation to end
-75000      # "t0" number of time steps to evolve the interface before starting running the fluid flow
-25000    # "tdump" data dump period
-300          # "Nx" lattice size X
-221          # "Ny" lattice size Y
+10000000   # "Tend" total number of steps for the simulation to end
+60000      # "t0" number of time steps to evolve the interface before starting running the fluid flow
+20000    # "tdump" data dump period
+250          # "Nx" lattice size X
+181          # "Ny" lattice size Y
 100          # "Nx0" starting position of the cell in X axis
-60         # "Ny0" starting position of the cell in Y axis
+90         # "Ny0" starting position of the cell in Y axis
 2.0         # "eps" interfacial width, to increase eps its necessary to decrease "dt" so that the simulation converges, reducing eps gives lower resolution for stream function and voritcity fields
 0.0         # "C0" Spontaneous curvature
 0.10           # "M" mobility
